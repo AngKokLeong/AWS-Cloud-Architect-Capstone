@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation template for creating an Amazon Aurora Serverless database'
+
+Parameters:
+  DBClusterName:
+    Type: String
+    Description: The name of the Aurora Serverless database cluster
+  InitialDatabaseName:
+    Type: String
+    Description: The name of the initial database to be created
+  DatabaseUsername:
+    Type: String
+    Description: The username for the database master user
+    NoEcho: true
+  DatabasePassword:
+    Type: String
+    Description: The password for the database master user
+    NoEcho: true
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: The ID of the VPC that the web server and database are running in
+  WebServerSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The security group ID of the web application server
+  PrivateDBSubnetOne:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet ID for the database subnet group
+  PrivateDBSubnetTwo:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet ID for the database subnet group
+
+
+Resources:
+
+  AuroraServerlessSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}-aurora-serverless-secret'
+      Description: Secret for Aurora Serverless database credentials
+      SecretString: !Sub '{"username": "${DatabaseUsername}", "password": "${DatabasePassword}"}'
+
+
+  AuroraServerlessCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-mysql
+      EngineMode: serverless
+      MasterUserPassword: '{{resolve:secretsmanager:${AuroraServerlessSecret}:SecretString:password}}'
+      MasterUsername: '{{resolve:secretsmanager:${AuroraServerlessSecret}:SecretString:username}}'
+      DBClusterIdentifier: !Ref DBClusterName
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroup
+      DatabaseName: !Ref InitialDatabaseName
+      ScalingConfiguration:
+        AutoPause: true
+        MaxCapacity: 2
+        MinCapacity: 2
+        SecondsUntilAutoPause: 3600
+
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access from web server only
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebServerSecurityGroupId
+      VpcId: !Ref VPCId
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnets available for the RDS DB
+      SubnetIds:
+        - !Ref PrivateDBSubnetOne
+        - !Ref PrivateDBSubnetTwo
+
+Outputs:
+  ClusterEndpoint:
+    Description: The cluster endpoint for the Aurora Serverless database
+    Value: !GetAtt AuroraServerlessCluster.Endpoint
+  SecretArn:
+    Description: The ARN of the Secrets Manager secret containing the database credentials
+    Value: !Ref AuroraServerlessSecret
