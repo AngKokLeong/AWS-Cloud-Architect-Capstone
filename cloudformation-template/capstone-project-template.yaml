@@ -319,6 +319,32 @@ Resources:
       Type: application
 
 
+# Need to configure listeners for the application load balancer
+ ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ApplicationLoadBalancer
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppTargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+# Need to configure Target Group for ApplicationLoadBalancer
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: LabVPC
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref LabVPC
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+
 
 ###########
 # IAM Role for App
