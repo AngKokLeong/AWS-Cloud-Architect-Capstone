@@ -541,7 +541,55 @@ Resources:
       Monitoring: false
 
 
+##########
+# EC2 Instance - Web Server 2
+# Layer Type: Compute Layer
+##########
 
+  WebServer2:
+    Type: AWS::EC2::Instance
+    DependsOn: AppTargetGroup
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref LatestAL2023AmiId
+      SubnetId: !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+             #!/bin/bash -ex
+              dnf -y update
+              #dnf -y install php8.2
+              #dnf -y install mariadb105-server
+              #dnf install -y php-mysqli
+              #dnf install -y git
+              #cd /var/www/html/
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              #unzip aws -d /var/www/html
+              #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
+              #unzip Example.zip -d /var/www/html/
+              #chkconfig httpd on
+              #service httpd start
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              #chown ec2-user:ec2-user Countrydatadump.sql
+              #cd /var/www/html
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              #unzip Project.zip -d /var/www/html/
+              #chown -R ec2-user:ec2-user /var/www/html
+      Tags:
+        - Key: Name
+          Value: WebServer2
+      IamInstanceProfile: !Ref InstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+        - DeviceName: /dev/xvdb
+          NoDevice: {}
+      Monitoring: false
 
 
 
