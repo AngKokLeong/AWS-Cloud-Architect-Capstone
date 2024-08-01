@@ -508,11 +508,13 @@ Resources:
         Fn::Base64: !Sub |
              #!/bin/bash -ex
               dnf -y update
-              #dnf -y install php8.2
+              dnf -y install php8.2
               #dnf -y install mariadb105-server
-              #dnf install -y php-mysqli
-              #dnf install -y git
-              #cd /var/www/html/
+              dnf install -y php-mysqli
+              dnf install -y git
+              cd /var/www/html/
+              git clone https://github.com/AngKokLeong/AWS_Cloud_Architect_Capstone_Sample_PHP_Application.git
+              mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application web_app
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #unzip aws -d /var/www/html
               #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
@@ -559,11 +561,13 @@ Resources:
         Fn::Base64: !Sub |
              #!/bin/bash -ex
               dnf -y update
-              #dnf -y install php8.2
+              dnf -y install php8.2
               #dnf -y install mariadb105-server
-              #dnf install -y php-mysqli
-              #dnf install -y git
-              #cd /var/www/html/
+              dnf install -y php-mysqli
+              dnf install -y git
+              cd /var/www/html/
+              git clone https://github.com/AngKokLeong/AWS_Cloud_Architect_Capstone_Sample_PHP_Application.git
+              mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application web_app
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #unzip aws -d /var/www/html
               #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
