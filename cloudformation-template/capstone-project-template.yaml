@@ -519,14 +519,14 @@ Resources:
               #unzip aws -d /var/www/html
               #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
               #unzip Example.zip -d /var/www/html/
-              #chkconfig httpd on
-              #service httpd start
+              chkconfig httpd on
+              service httpd start
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #chown ec2-user:ec2-user Countrydatadump.sql
               #cd /var/www/html
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #unzip Project.zip -d /var/www/html/
-              #chown -R ec2-user:ec2-user /var/www/html
+              chown -R ec2-user:ec2-user /var/www/html
       Tags:
         - Key: Name
           Value: WebServer1
@@ -572,14 +572,14 @@ Resources:
               #unzip aws -d /var/www/html
               #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
               #unzip Example.zip -d /var/www/html/
-              #chkconfig httpd on
-              #service httpd start
+              chkconfig httpd on
+              service httpd start
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #chown ec2-user:ec2-user Countrydatadump.sql
               #cd /var/www/html
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #unzip Project.zip -d /var/www/html/
-              #chown -R ec2-user:ec2-user /var/www/html
+              chown -R ec2-user:ec2-user /var/www/html
       Tags:
         - Key: Name
           Value: WebServer2
@@ -595,7 +595,31 @@ Resources:
           NoDevice: {}
       Monitoring: false
 
+##########
+# Auto Scaling Group
+# Layer Type: Compute Layer
+##########
 
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: 
+        - Fn::GetAtt: [PrivateSubnet1, SubnetId]
+        - Fn::GetAtt: [PrivateSubnet2, SubnetId] 
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ExampleLaunchTemplate
+        Version: !GetAtt ExampleLaunchTemplate.LatestVersionNumber
+      MinSize: 2
+      MaxSize: 6
+      DesiredCapacity: 2
+      HealthCheckGracePeriod: 300
+      HealthCheckType: ELB
+      TargetGroupARNs:
+        - !Ref AppTargetGroup
+      Tags:
+        - Key: Name
+          Value: AutoScalingGroupPrivateSubnet
+          PropagateAtLaunch: true
 
 
 ##########
@@ -615,6 +639,7 @@ Resources:
             Tags:
             - Key: Name
               Value: ExampleAPP
+
         IamInstanceProfile:
           Arn:
             Fn::GetAtt:
@@ -624,28 +649,30 @@ Resources:
             - !Ref AppSecurityGroup
         UserData:
           Fn::Base64: !Sub |
-             #!/bin/bash -ex
+            #!/bin/bash -ex
               dnf -y update
               dnf -y install php8.2
-              dnf -y install mariadb105-server
+              #dnf -y install mariadb105-server
               dnf install -y php-mysqli
+              dnf install -y git
               cd /var/www/html/
               wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
               unzip aws -d /var/www/html
-              wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
-              #wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-89090/22-lab-course-project/s3/Example.zip
-              unzip Example.zip
+              git clone https://github.com/AngKokLeong/AWS_Cloud_Architect_Capstone_Sample_PHP_Application.git
+              mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application web_app
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              #unzip aws -d /var/www/html
+              #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
+              #unzip Example.zip -d /var/www/html/
               chkconfig httpd on
               service httpd start
-              #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #chown ec2-user:ec2-user Countrydatadump.sql
               #cd /var/www/html
-             #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Project.zip
-             #unzip Project.zip -d /var/www/html/
+              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              #unzip Project.zip -d /var/www/html/
               chown -R ec2-user:ec2-user /var/www/html
       LaunchTemplateName: Project-LT
-
-
 
 
 Outputs:
