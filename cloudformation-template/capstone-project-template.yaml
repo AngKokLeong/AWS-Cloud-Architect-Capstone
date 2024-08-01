@@ -167,7 +167,16 @@ Resources:
       # Route traffic through the NAT Gateway:
       NatGatewayId: !Ref NATGateway
 
-
+  PrivateRouteApp2:            # Private route table can access web via NAT (created below)
+    Type: AWS::EC2::Route
+    DependsOn:
+      - PrivateRouteTableApp
+      - NATGateway2
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableApp
+      DestinationCidrBlock: 0.0.0.0/24
+      # Route traffic through the NAT Gateway:
+      NatGatewayId: !Ref NATGateway2
 
 
 ###########
@@ -479,6 +488,13 @@ Resources:
       Tags:
         - Key: Name
           Value: Example-DB-subnet-group
+
+
+
+
+
+
+
 
 
 ##########
