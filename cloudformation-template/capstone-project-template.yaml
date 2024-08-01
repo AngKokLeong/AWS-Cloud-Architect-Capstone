@@ -57,6 +57,11 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub Lab-NATGW
+  ElasticIPAddress:
+    Type: AWS::EC2::EIP
+    DependsOn: LabVPC
+    Properties:
+      Domain: vpc
 
   ###########
   # A NAT Gateway in Public Subnet 2: (added on 31/07/2024)
@@ -64,16 +69,15 @@ Resources:
   
   NATGateway2:
     Type: AWS::EC2::NatGateway
-    DependsOn: ElasticIPAddress
+    DependsOn: ElasticIPAddress2
     Properties:
-      AllocationId: !GetAtt ElasticIPAddress.AllocationId
+      AllocationId: !GetAtt ElasticIPAddress2.AllocationId
       ConnectivityType: public
       SubnetId: !Ref PublicSubnet2
       Tags:
       - Key: Name
         Value: !Sub Lab-NATGW2
-        
-  ElasticIPAddress:
+  ElasticIPAddress2:
     Type: AWS::EC2::EIP
     DependsOn: LabVPC
     Properties:
@@ -162,6 +166,9 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       # Route traffic through the NAT Gateway:
       NatGatewayId: !Ref NATGateway
+
+
+
 
 ###########
 # Private DB Route Table
