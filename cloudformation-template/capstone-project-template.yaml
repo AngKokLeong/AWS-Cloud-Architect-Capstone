@@ -29,6 +29,7 @@ Parameters:
     Type: String
     Description: Enter Database Name
     MinLength: 4
+    Default: countries
 
 Resources:
 ###########
