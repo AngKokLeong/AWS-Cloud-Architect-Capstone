@@ -13,8 +13,24 @@ Parameters:
     Description: vockey labsuser.pem (same thing)
     Default: default-lab-key
 
-Resources:
+  DatabaseUserName:
+    Type: String
+    Description: Enter Database Username
+    MinLength: 4
+    ConstraintDescription: The username must be between 4 and 16 characters long
 
+  DatabasePassword:
+    Type: String
+    Description: Enter Database Password
+    NoEcho: true
+    MinLength: 8
+
+  DatabaseName:
+    Type: String
+    Description: Enter Database Name
+    MinLength: 4
+
+Resources:
 ###########
 # LabVPC with 2 Internet Gateway
 # Layer Type: Network Layer
@@ -566,7 +582,8 @@ Resources:
               dnf install -y php-mysqli
               dnf install -y git
               cd /var/www/html/
-              git clone https://github.com/AngKokLeong/AWS_Cloud_Architect_Capstone_Sample_PHP_Application.git
+              wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
+              git clone https://github.com/AngKokLeong/AWS-Cloud-Architect-Capstone-Sample-PHP-Application.git
               mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application web_app
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               #unzip aws -d /var/www/html
@@ -652,18 +669,14 @@ Resources:
             #!/bin/bash -ex
               dnf -y update
               dnf -y install php8.2
-              #dnf -y install mariadb105-server
+              dnf -y install mariadb105-server
               dnf install -y php-mysqli
               dnf install -y git
               cd /var/www/html/
               wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
               unzip aws -d /var/www/html
               git clone https://github.com/AngKokLeong/AWS_Cloud_Architect_Capstone_Sample_PHP_Application.git
-              mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application web_app
-              #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-              #unzip aws -d /var/www/html
-              #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
-              #unzip Example.zip -d /var/www/html/
+              mv AWS_Cloud_Architect_Capstone_Sample_PHP_Application /var/www/html
               chkconfig httpd on
               service httpd start
               #wget XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -673,6 +686,51 @@ Resources:
               #unzip Project.zip -d /var/www/html/
               chown -R ec2-user:ec2-user /var/www/html
       LaunchTemplateName: Project-LT
+
+
+#############
+# Aurora Serverless Database Password Secret 
+# Layer Type: Database Layer
+#############
+  DBPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: capstone/databasePassword
+      SecretString: !Ref DatabasePassword
+      Description: Database password for the Database that PHP Application will use to access
+
+#############
+# Aurora Serverless Database Username Secret 
+# Layer Type: Database Layer
+#############
+  DBPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: capstone/userName
+      SecretString: !Ref DatabaseUserName
+      Description: Database Username for the Database that PHP Application will use to access
+
+#############
+# Aurora Serverless Database Name Secret 
+# Layer Type: Database Layer
+#############
+  DBPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: capstone/databaseName
+      SecretString: !Ref DatabaseName
+      Description: Database Name for the Database that PHP Application will use to access
+
+
+
+
+
+##########
+# Aurora Serverless Database Template
+# Layer Type: Database Layer
+##########
+
+## TODO: Create the 
 
 
 Outputs:
