@@ -426,6 +426,33 @@ Resources:
                 Resource: !Sub arn:aws:secretsmanager:*:${AWS::AccountId}:secret:*
 
 ###########
+# Linux Bastion Security Group
+# Layer Type: Security Layer
+###########
+
+  LinuxBastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: LabVPC
+    Properties:
+      GroupName: Linux-Bastion-SG
+      GroupDescription: Enable access to SSG
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0 #Allow HTTP Traffic from any IPv4 address
+      Tags:
+        - Key: Name
+          Value: Linux-Bastion-Security-Group
+
+
+
+
+
+
+
+###########
 # ALB Security Group
 # Layer Type: Security Layer
 ###########
@@ -606,6 +633,12 @@ Resources:
           NoDevice: {}
       Monitoring: false
 
+
+
+
+
+
+
 ##########
 # Auto Scaling Group
 # Layer Type: Compute Layer
@@ -680,6 +713,9 @@ Resources:
                 chown -R ec2-user:ec2-user /var/www/html
 
       LaunchTemplateName: Project-LT
+
+
+
 
 
 #############
