@@ -446,12 +446,6 @@ Resources:
         - Key: Name
           Value: Linux-Bastion-Security-Group
 
-
-
-
-
-
-
 ###########
 # ALB Security Group
 # Layer Type: Security Layer
@@ -533,6 +527,44 @@ Resources:
         - Key: Name
           Value: Example-DB-subnet-group
 
+
+###########
+# EC2 Bastion Host Key Pair
+# Layer Type: Security Layer
+###########
+  LinuxBastionHostOneKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: Linux-Bastion-Host-One-Key-Pair
+
+
+##########
+# EC2 Instance - Linux Bastion Host 1
+# Layer Type: Compute Layer
+##########
+
+  LinuxBastionHost1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref LatestAL2023AmiId
+      SubnetId: !Ref PublicSubnet1
+      KeyName: !Ref LinuxBastionHostOneKeyPair
+      SecurityGroupIds:
+        - !Ref LinuxBastionSecurityGroup
+      Tags:
+        - Key: Name
+          Value: LinuxBastionHost1
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+        - DeviceName: /dev/xvdb
+          NoDevice: {}
+      Monitoring: false
 
 ##########
 # EC2 Instance - Web Server 1
@@ -633,12 +665,6 @@ Resources:
           NoDevice: {}
       Monitoring: false
 
-
-
-
-
-
-
 ##########
 # Auto Scaling Group
 # Layer Type: Compute Layer
@@ -714,9 +740,9 @@ Resources:
 
       LaunchTemplateName: Project-LT
 
-
-
-
+##################
+# DATABASE LAYER
+##################
 
 #############
 # Aurora Serverless Database Password Secret 
