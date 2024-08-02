@@ -32,6 +32,11 @@ Parameters:
     Default: countries
 
 Resources:
+
+##################################################
+# NETWORK LAYER
+##################################################
+
 ###########
 # LabVPC with 2 Internet Gateway
 # Layer Type: Network Layer
@@ -380,6 +385,9 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
 
+##################################################
+# SECURITY LAYER
+##################################################
 
 ###########
 # IAM Role for App
@@ -536,6 +544,10 @@ Resources:
     Type: AWS::EC2::KeyPair
     Properties:
       KeyName: Linux-Bastion-Host-One-Key-Pair
+
+##################################################
+# COMPUTE LAYER
+##################################################
 
 
 ##########
@@ -740,9 +752,9 @@ Resources:
 
       LaunchTemplateName: Project-LT
 
-##################
+##################################################
 # DATABASE LAYER
-##################
+##################################################
 
 #############
 # Aurora Serverless Database Password Secret 
