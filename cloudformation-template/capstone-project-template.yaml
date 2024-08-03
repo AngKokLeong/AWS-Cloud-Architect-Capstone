@@ -584,7 +584,15 @@ Resources:
     Properties:
       KeyName: Web-Server-One-Key-Pair
 
-      
+###########
+# Web Server Two Key Pair
+# Layer Type: Security Layer
+###########
+  WebServerTwoKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: Web-Server-Two-Key-Pair
+
 
 ##################################################
 # COMPUTE LAYER
@@ -711,6 +719,7 @@ Resources:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
       SubnetId: !Ref PrivateSubnet2
+      KeyName: !Ref WebServerTwoKeyPair
       SecurityGroupIds:
         - !Ref AppSecurityGroup
         - !Ref WebServerSSHSecurityGroup
