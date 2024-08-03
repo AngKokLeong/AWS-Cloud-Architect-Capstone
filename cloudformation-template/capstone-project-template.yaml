@@ -455,6 +455,27 @@ Resources:
           Value: Linux-Bastion-Security-Group
 
 ###########
+# Web Server SSH Security Group
+# Layer Type: Security Layer
+###########
+
+  WebServerSSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: LabVPC
+    Properties:
+      GroupName: Web-Server-SSH-SG
+      GroupDescription: Enable access to SSH
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !GetAtt LinuxBastionSecurityGroup.GroupId
+      Tags:
+        - Key: Name
+          Value: Web-Server-SSH-Security-Group
+
+###########
 # ALB Security Group
 # Layer Type: Security Layer
 ###########
@@ -563,6 +584,8 @@ Resources:
     Properties:
       KeyName: Web-Server-One-Key-Pair
 
+      
+
 ##################################################
 # COMPUTE LAYER
 ##################################################
@@ -639,6 +662,7 @@ Resources:
       KeyName: !Ref WebServerOneKeyPair
       SecurityGroupIds:
         - !Ref AppSecurityGroup
+        - !Ref WebServerSSHSecurityGroup
       UserData:
         Fn::Base64: !Sub |
              #!/bin/bash -ex
@@ -689,6 +713,7 @@ Resources:
       SubnetId: !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref AppSecurityGroup
+        - !Ref WebServerSSHSecurityGroup
       UserData:
         Fn::Base64: !Sub |
               #!/bin/bash -ex
