@@ -916,6 +916,22 @@ Outputs:
     Value: !GetAtt WebServerTwoKeyPair.KeyPairId
     Description: Key Pair ID for Web Server Two
 
+  WebServerOnePrivateIPAddress:
+    Value: !GetAtt WebServer1.PrivateIp
+    Description: Private IP Address for Web Server One
+
+  WebServerTwoPrivateIPAddress:
+    Value: !GetAtt WebServer2.PrivateIp
+    Description: Private IP Address for Web Server Two
+
+  LinuxBastionHostOnePublicIPAddress:
+    Value: !GetAtt LinuxBastionHost1.PublicIp
+    Description: Public IP Address for Linux Bastion Host One
+
+  LinuxBastionHostTwoPublicIPAddress:
+    Value: !GetAtt LinuxBastionHost2.PublicIp
+    Description: Public IP Address for Linux Bastion Host Two
+
   DatabaseName:
     Value: !Ref DatabaseName
     Description: Database Name
