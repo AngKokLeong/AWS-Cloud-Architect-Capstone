@@ -384,6 +384,13 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
+      TargetGroupAttributes:
+       - Key: stickiness.enabled
+         Value: true
+       - Key: stickiness.type
+         Value: lb_cookie
+       - Key: stickiness.lb_cookie.duration_seconds
+         Value: 10
 
 ##################################################
 # SECURITY LAYER
@@ -673,12 +680,12 @@ Resources:
         - !Ref WebServerSSHSecurityGroup
       UserData:
         Fn::Base64: !Sub |
-             #!/bin/bash -ex
+              #!/bin/bash -ex
                 dnf -y update
                 dnf -y install php8.2
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
-                sudo systemctl enable mariadb.service
+                systemctl start mariadb.service
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -687,9 +694,29 @@ Resources:
                 unzip Example.zip
                 chkconfig httpd on
                 service httpd start
-                #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
-                #chown ec2-user:ec2-user Countrydatadump.sql
+                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+                chown ec2-user:ec2-user Countrydatadump.sql
+                
+                $USER="${!Ref DatabaseUserName}"
+                $PASSWORD="${!Ref DatabasePassword}"
+                $DATABASE_NAME="${!Ref DatabaseName}"
+                RESULT=0
 
+                # Execute the MySQL command and capture the output
+                OUTPUT=$(mysql -u "$USER" -p"$PASSWORD" --batch -e "SHOW DATABASES LIKE '"$DATABASE_NAME"';")
+
+                # Check if the output is empty
+                if [ -z "$OUTPUT" ]; then
+                    RESULT=0
+                else
+                    RESULT=1
+                fi
+
+                if [RESULT -eq 0]; then
+                  mysql -u "$USER" -p"$PASSWORD" --batch -e "CREATE DATABASE '$DATABASE_NAME';"
+                  mysql -u "$USER" -p"$PASSWORD" "$DATABASE_NAME" < Countrydatadump.sql
+                fi
+                
                 chown -R ec2-user:ec2-user /var/www/html
       Tags:
         - Key: Name
@@ -730,7 +757,7 @@ Resources:
                 dnf -y install php8.2
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
-                sudo systemctl enable mariadb.service
+                systemctl start mariadb.service
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -739,9 +766,29 @@ Resources:
                 unzip Example.zip
                 chkconfig httpd on
                 service httpd start
-                #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
-                #chown ec2-user:ec2-user Countrydatadump.sql
+                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+                chown ec2-user:ec2-user Countrydatadump.sql
+                
+                $USER="${!Ref DatabaseUserName}"
+                $PASSWORD="${!Ref DatabasePassword}"
+                $DATABASE_NAME="${!Ref DatabaseName}"
+                RESULT=0
 
+                # Execute the MySQL command and capture the output
+                OUTPUT=$(mysql -u "$USER" -p"$PASSWORD" --batch -e "SHOW DATABASES LIKE '"$DATABASE_NAME"';")
+
+                # Check if the output is empty
+                if [ -z "$OUTPUT" ]; then
+                    RESULT=0
+                else
+                    RESULT=1
+                fi
+
+                if [RESULT -eq 0]; then
+                  mysql -u "$USER" -p"$PASSWORD" --batch -e "CREATE DATABASE '$DATABASE_NAME';"
+                  mysql -u "$USER" -p"$PASSWORD" "$DATABASE_NAME" < Countrydatadump.sql
+                fi
+                
                 chown -R ec2-user:ec2-user /var/www/html
       Tags:
         - Key: Name
@@ -812,12 +859,15 @@ Resources:
             - !Ref AppSecurityGroup
         UserData:
           Fn::Base64: !Sub | 
-             #!/bin/bash -ex
+              #!/bin/bash -ex
                 dnf -y update
                 dnf -y install php8.2
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
-                sudo systemctl enable mariadb.service
+                systemctl start mariadb.service
+                
+
+
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -826,9 +876,29 @@ Resources:
                 unzip Example.zip
                 chkconfig httpd on
                 service httpd start
-                #wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
-                #chown ec2-user:ec2-user Countrydatadump.sql
+                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+                chown ec2-user:ec2-user Countrydatadump.sql
+                
+                $USER="${!Ref DatabaseUserName}"
+                $PASSWORD="${!Ref DatabasePassword}"
+                $DATABASE_NAME="${!Ref DatabaseName}"
+                RESULT=0
 
+                # Execute the MySQL command and capture the output
+                OUTPUT=$(mysql -u "$USER" -p"$PASSWORD" --batch -e "SHOW DATABASES LIKE '"$DATABASE_NAME"';")
+
+                # Check if the output is empty
+                if [ -z "$OUTPUT" ]; then
+                    RESULT=0
+                else
+                    RESULT=1
+                fi
+
+                if [RESULT -eq 0]; then
+                  mysql -u "$USER" -p"$PASSWORD" --batch -e "CREATE DATABASE '$DATABASE_NAME';"
+                  mysql -u "$USER" -p"$PASSWORD" "$DATABASE_NAME" < Countrydatadump.sql
+                fi
+                
                 chown -R ec2-user:ec2-user /var/www/html
 
       LaunchTemplateName: Project-LT
@@ -869,9 +939,6 @@ Resources:
       Name: capstone/databaseName
       SecretString: !Ref DatabaseName
       Description: Database Name for the Database that PHP Application will use to access
-
-
-
 
 
 ##########
