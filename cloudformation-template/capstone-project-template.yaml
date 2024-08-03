@@ -537,13 +537,22 @@ Resources:
 
 
 ###########
-# EC2 Bastion Host Key Pair
+# Linux Bastion Host One Key Pair
 # Layer Type: Security Layer
 ###########
   LinuxBastionHostOneKeyPair:
     Type: AWS::EC2::KeyPair
     Properties:
       KeyName: Linux-Bastion-Host-One-Key-Pair
+
+###########
+# Linux Bastion Host Two Key Pair
+# Layer Type: Security Layer
+###########
+  LinuxBastionHostTwoKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: Linux-Bastion-Host-Two-Key-Pair
 
 ##################################################
 # COMPUTE LAYER
@@ -567,6 +576,34 @@ Resources:
       Tags:
         - Key: Name
           Value: LinuxBastionHost1
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+        - DeviceName: /dev/xvdb
+          NoDevice: {}
+      Monitoring: false
+
+##########
+# EC2 Instance - Linux Bastion Host 2
+# Layer Type: Compute Layer
+##########
+
+  LinuxBastionHost2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref LatestAL2023AmiId
+      SubnetId: !Ref PublicSubnet2
+      KeyName: !Ref LinuxBastionHostTwoKeyPair
+      SecurityGroupIds:
+        - !Ref LinuxBastionSecurityGroup
+      Tags:
+        - Key: Name
+          Value: LinuxBastionHost2
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -805,3 +842,19 @@ Outputs:
   LoadBalancerDNS:
     Description: The DNS name of the Application Load Balancer
     Value: !GetAtt ApplicationLoadBalancer.DNSName
+
+  LinuxBastionHostOneKeyPairID:
+    Value: !GetAtt LinuxBastionHostOneKeyPair.KeyPairId
+    Description: Key Pair ID for Linux Bastion Host One
+
+  LinuxBastionHostTwoKeyPairID:
+    Value: !GetAtt LinuxBastionHostTwoKeyPair.KeyPairId
+    Description: Key Pair ID for Linux Bastion Host Two
+
+  DatabaseName:
+    Value: !Ref DatabaseName
+    Description: Database Name
+
+  VpcId: 
+    Value: !GetAtt LabVPC.VpcId
+    Description: VPC ID
