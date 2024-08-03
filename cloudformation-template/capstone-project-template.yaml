@@ -443,7 +443,7 @@ Resources:
     DependsOn: LabVPC
     Properties:
       GroupName: Linux-Bastion-SG
-      GroupDescription: Enable access to SSG
+      GroupDescription: Enable access to SSH
       VpcId: !Ref LabVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -554,6 +554,15 @@ Resources:
     Properties:
       KeyName: Linux-Bastion-Host-Two-Key-Pair
 
+###########
+# Web Server One Key Pair
+# Layer Type: Security Layer
+###########
+  WebServerOneKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: Web-Server-One-Key-Pair
+
 ##################################################
 # COMPUTE LAYER
 ##################################################
@@ -627,6 +636,7 @@ Resources:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
       SubnetId: !Ref PrivateSubnet1
+      KeyName: !Ref WebServerOneKeyPair
       SecurityGroupIds:
         - !Ref AppSecurityGroup
       UserData:
@@ -850,6 +860,10 @@ Outputs:
   LinuxBastionHostTwoKeyPairID:
     Value: !GetAtt LinuxBastionHostTwoKeyPair.KeyPairId
     Description: Key Pair ID for Linux Bastion Host Two
+
+  WebServerOneKeyPairID:
+    Value: !GetAtt WebServerOneKeyPair.KeyPairId
+    Description: Key Pair ID for Web Server One
 
   DatabaseName:
     Value: !Ref DatabaseName
