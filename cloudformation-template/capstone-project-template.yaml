@@ -899,7 +899,7 @@ Outputs:
     Value: !GetAtt WebServerOneKeyPair.KeyPairId
     Description: Key Pair ID for Web Server One
 
-  WebServerTwpKeyPairID:
+  WebServerTwoKeyPairID:
     Value: !GetAtt WebServerTwoKeyPair.KeyPairId
     Description: Key Pair ID for Web Server Two
 
