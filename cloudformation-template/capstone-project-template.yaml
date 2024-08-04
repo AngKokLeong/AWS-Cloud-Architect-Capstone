@@ -386,6 +386,10 @@ Resources:
   
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DependsOn: 
+      - PublicSubnet1
+      - PublicSubnet2
+      - ALBSecurityGroup
     Properties:
       Name: app-LB
       Scheme: internet-facing
@@ -401,7 +405,9 @@ Resources:
 # Need to configure listeners for the application load balancer
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: ApplicationLoadBalancer
+    DependsOn: 
+      - ApplicationLoadBalancer
+      - AppTargetGroup
     Properties:
       DefaultActions:
         - Type: forward
@@ -555,7 +561,9 @@ Resources:
 
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    DependsOn: LabVPC
+    DependsOn: 
+      - LabVPC
+      - ALBSecurityGroup
     Properties:
       GroupName: Inventory-App
       GroupDescription: Enable access to App
@@ -597,6 +605,9 @@ Resources:
 ## Create DB subnet group
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
+    DependsOn: 
+      - PrivateDBSubnet1
+      - PrivateDBSubnet2
     Properties:
       DBSubnetGroupDescription: Example-DB-subnet-group
       SubnetIds: [ !Ref PrivateDBSubnet1, !Ref PrivateDBSubnet2 ]
@@ -654,6 +665,10 @@ Resources:
 
   LinuxBastionHost1:
     Type: AWS::EC2::Instance
+    DependsOn:
+      - LinuxBastionHostOneKeyPair
+      - LinuxBastionSecurityGroup
+      - PublicSubnet2
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -682,6 +697,10 @@ Resources:
 
   LinuxBastionHost2:
     Type: AWS::EC2::Instance
+    DependsOn: 
+      - LinuxBastionHostTwoKeyPair
+      - LinuxBastionSecurityGroup
+      - PublicSubnet2
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -710,7 +729,12 @@ Resources:
 
   WebServer1:
     Type: AWS::EC2::Instance
-    DependsOn: AppTargetGroup
+    DependsOn: 
+      - AppTargetGroup
+      - AppSecurityGroup
+      - WebServerSSHSecurityGroup
+      - WebServerOneKeyPair
+      - PrivateSubnet1
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -772,7 +796,12 @@ Resources:
 
   WebServer2:
     Type: AWS::EC2::Instance
-    DependsOn: AppTargetGroup
+    DependsOn: 
+      - AppTargetGroup
+      - WebServerTwoKeyPair
+      - WebServerSSHSecurityGroup
+      - AppSecurityGroup
+      - PrivateSubnet2
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -833,6 +862,11 @@ Resources:
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: 
+      - AppTargetGroup
+      - ExampleLaunchTemplate
+      - PrivateSubnet1
+      - PrivateSubnet2
     Properties:
       VPCZoneIdentifier: 
         - Fn::GetAtt: [PrivateSubnet1, SubnetId]
@@ -860,6 +894,9 @@ Resources:
 
   ExampleLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
+    DependsOn: 
+      - AppSecurityGroup
+      - InstanceProfile
     Properties:
       LaunchTemplateData:
         InstanceType: t2.micro
@@ -960,6 +997,10 @@ Resources:
 
   AuroraServerlessDatabaseCluster:
     Type: AWS::RDS::DBCluster
+    DependsOn: 
+      - DBSecurityGroup
+      - DatabasePasswordSecret
+      - DBSubnetGroup
     Properties:
       DBClusterIdentifier: !Ref DatabaseClusterName
       Engine: aurora-mysql
@@ -981,6 +1022,8 @@ Resources:
 
   RDSDBInstance1:
       Type: 'AWS::RDS::DBInstance'
+      DependsOn: 
+        - AuroraServerlessDatabaseCluster
       Properties:
         Engine: aurora-mysql
         DBInstanceClass: db.serverless
@@ -988,6 +1031,8 @@ Resources:
 
   RDSDBInstance2:
       Type: 'AWS::RDS::DBInstance'
+      DependsOn: 
+        - AuroraServerlessDatabaseCluster
       Properties:
         Engine: aurora-mysql
         DBInstanceClass: db.serverless
