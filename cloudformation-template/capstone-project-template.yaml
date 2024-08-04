@@ -145,9 +145,6 @@ Resources:
       Domain: vpc
 
 
-
-
-
 ###########
 # Public Subnets x 2
 # Layer Type: Network Layer
@@ -331,8 +328,6 @@ Resources:
       SubnetId: !Ref PrivateSubnet2
 
 
-
-
 ###########
 # Private DB Route Table
 # Layer Type: Network Layer
@@ -405,6 +400,8 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableDB
       SubnetId: !Ref PrivateDBSubnet2
 
+
+
 ##########
 # Application Load Balancer (added on 31/07/2024) 
 # Layer Type: Network Layer
@@ -432,13 +429,12 @@ Resources:
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn: 
-      - ApplicationLoadBalancer
       - AppTargetGroup
     Properties:
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref AppTargetGroup
-      LoadBalancerArn: !Ref ApplicationLoadBalancer
+          TargetGroupArn: !GetAtt AppTargetGroup.TargetGroupArn
+      LoadBalancerArn: !GetAtt ApplicationLoadBalancer.LoadBalancerArn
       Port: 80
       Protocol: HTTP
 
@@ -447,8 +443,6 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: 
       - LabVPC
-      - WebServer1
-      - WebServer2
     Properties:
       Port: 80
       Protocol: HTTP
@@ -459,11 +453,6 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       TargetType: instance
-      Targets: 
-        - Id: !Ref WebServer1
-          Port: 80
-        - Id: !Ref WebServer2
-          Port: 80
       TargetGroupAttributes:
         - Key: stickiness.enabled
           Value: true
@@ -921,10 +910,22 @@ Resources:
       HealthCheckGracePeriod: 300
       HealthCheckType: ELB
       TargetGroupARNs:
-        - !Ref AppTargetGroup
+        - !GetAtt AppTargetGroup.TargetGroupArn
       Tags:
         - Key: Name
           Value: AutoScalingGroupPrivateSubnet
+          PropagateAtLaunch: true
+
+  TargetTrackingScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 70.0
+
 
 
 ##########
