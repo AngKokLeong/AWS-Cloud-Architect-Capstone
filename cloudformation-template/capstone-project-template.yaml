@@ -445,7 +445,10 @@ Resources:
 # Need to configure Target Group for ApplicationLoadBalancer
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    DependsOn: LabVPC
+    DependsOn: 
+      - LabVPC
+      - WebServer1
+      - WebServer2
     Properties:
       Port: 80
       Protocol: HTTP
@@ -456,6 +459,11 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       TargetType: instance
+      Targets: 
+        - Id: !Ref WebServer1
+          Port: 80
+        - Id: !Ref WebServer2
+          Port: 80
       TargetGroupAttributes:
         - Key: stickiness.enabled
           Value: true
@@ -782,6 +790,7 @@ Resources:
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
                 dnf -y install git
+                dnf -y install stress
 
                 cd /var/www/html/
                 
@@ -850,6 +859,7 @@ Resources:
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
                 dnf -y install git
+                dnf -y install stress
 
                 cd /var/www/html/
                 
@@ -915,7 +925,6 @@ Resources:
       Tags:
         - Key: Name
           Value: AutoScalingGroupPrivateSubnet
-          PropagateAtLaunch: true
 
 
 ##########
@@ -955,6 +964,7 @@ Resources:
                 dnf -y install mariadb105-server
                 dnf install -y php-mysqli
                 dnf -y install git
+                dnf -y install stress
 
                 cd /var/www/html/
                 
