@@ -66,10 +66,6 @@ Parameters:
       - '3.06'
       - '3.07'
 
-    
-
-
-
 Resources:
 
 ##################################################
@@ -902,7 +898,6 @@ Resources:
       - ExampleLaunchTemplate
       - PrivateSubnet1
       - PrivateSubnet2
-
     Properties:
       VPCZoneIdentifier: 
         - Fn::GetAtt: [PrivateSubnet1, SubnetId]
@@ -995,7 +990,7 @@ Resources:
   DatabasePasswordSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: password
+      Name: capstone/databasePassword
       SecretString: !Ref DatabasePassword
       Description: Database password for the Database that PHP Application will use to access
 
@@ -1006,7 +1001,7 @@ Resources:
   DatabaseUserNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: username
+      Name: capstone/databaseUsername
       SecretString: !Ref DatabaseUserName
       Description: Database Username for the Database that PHP Application will use to access
 
@@ -1020,6 +1015,19 @@ Resources:
       Name: capstone/databaseName
       SecretString: !Ref DatabaseName
       Description: Database Name for the Database that PHP Application will use to access
+
+#############
+# Aurora Serverless Database Cluster Endpoint Secret 
+# Layer Type: Database Layer
+#############
+  AuroraDatabaseClusterEndpointSecret:
+    Type: AWS::SecretsManager::Secret
+    DependsOn: AuroraServerlessDatabaseCluster
+    Properties:
+      Name: capstone/databaseClusterEndpoint
+      SecretString: !GetAtt AuroraServerlessDatabaseCluster.Endpoint.Address
+      Description: Aurora Database Cluster Endpoint Address
+
 
 
 ##########
@@ -1127,3 +1135,7 @@ Outputs:
   AuroraServerlessDatabaseClusterMaxACU:
     Description: The maximum ACU for the Aurora Serverless v2 cluster
     Value: !Ref AuroraDatabaseClusterMaxCapacity
+
+  AuroraServerlessDatabaseEndpointAddress:
+    Description: The endpoint address for the Aurora Serverless v2 cluster
+    Value: !GetAtt AuroraServerlessDatabaseCluster.Endpoint.Address
