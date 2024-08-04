@@ -459,8 +459,7 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
-      #TargetType: instance
-
+      TargetType: instance
       TargetGroupAttributes:
         - Key: stickiness.enabled
           Value: true
@@ -903,6 +902,7 @@ Resources:
       - ExampleLaunchTemplate
       - PrivateSubnet1
       - PrivateSubnet2
+
     Properties:
       VPCZoneIdentifier: 
         - Fn::GetAtt: [PrivateSubnet1, SubnetId]
