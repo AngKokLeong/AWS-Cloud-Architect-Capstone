@@ -443,6 +443,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: 
       - LabVPC
+      - WebServer1
+      - WebServer2
     Properties:
       Port: 80
       Protocol: HTTP
@@ -756,7 +758,6 @@ Resources:
   WebServer1:
     Type: AWS::EC2::Instance
     DependsOn: 
-      - AppTargetGroup
       - AppSecurityGroup
       - WebServerSSHSecurityGroup
       - WebServerOneKeyPair
@@ -825,7 +826,6 @@ Resources:
   WebServer2:
     Type: AWS::EC2::Instance
     DependsOn: 
-      - AppTargetGroup
       - WebServerTwoKeyPair
       - WebServerSSHSecurityGroup
       - AppSecurityGroup
