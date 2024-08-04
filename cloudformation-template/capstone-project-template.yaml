@@ -110,7 +110,9 @@ Resources:
   # A NAT Gateway:
   NATGateway:
     Type: AWS::EC2::NatGateway
-    DependsOn: ElasticIPAddress
+    DependsOn: 
+      - ElasticIPAddress
+      - PublicSubnet1
     Properties:
       AllocationId: !GetAtt ElasticIPAddress.AllocationId
       ConnectivityType: public
@@ -130,7 +132,9 @@ Resources:
   
   NATGateway2:
     Type: AWS::EC2::NatGateway
-    DependsOn: ElasticIPAddress2
+    DependsOn: 
+      - ElasticIPAddress2
+      - PublicSubnet2
     Properties:
       AllocationId: !GetAtt ElasticIPAddress2.AllocationId
       ConnectivityType: public
@@ -143,6 +147,96 @@ Resources:
     DependsOn: LabVPC
     Properties:
       Domain: vpc
+
+
+
+
+
+###########
+# Public Subnets x 2
+# Layer Type: Network Layer
+###########
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn: LabVPC
+    Properties:
+      VpcId: !Ref LabVPC
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs
+          Ref: AWS::Region
+      Tags:
+        - Key: Name
+          Value: Public Subnet 1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    DependsOn: LabVPC
+    Properties:
+      VpcId: !Ref LabVPC
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs
+          Ref: AWS::Region
+      Tags:
+        - Key: Name
+          Value: Public Subnet 2
+
+###########
+# Route Table Association
+# Layer Type: Network Layer
+###########
+
+  PublicRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet1
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet2
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+
+
+
+###########
+# Public Route Table
+# Layer Type: Network Layer
+###########
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: LabVPC
+    Properties:
+      VpcId: !Ref LabVPC
+      Tags:
+        - Key: Name
+          Value: Public Route Table
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+      - PublicRouteTable
+      - VPCtoIGWConnection
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+      RouteTableId: !Ref PublicRouteTable
+
 
 ###########
 # Private App Subnets x 2
@@ -178,29 +272,6 @@ Resources:
           Value: Private Subnet 2
 
 
-###########
-# Public Route Table
-# Layer Type: Network Layer
-###########
-
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    DependsOn: LabVPC
-    Properties:
-      VpcId: !Ref LabVPC
-      Tags:
-        - Key: Name
-          Value: Public Route Table
-
-  PublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - PublicRouteTable
-      - VPCtoIGWConnection
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref IGW
-      RouteTableId: !Ref PublicRouteTable
 
 ###########
 # Private Route Table App
@@ -241,72 +312,9 @@ Resources:
 
 
 ###########
-# Private DB Route Table
+# Private Route Table Association
 # Layer Type: Network Layer
 ###########
-
-  PrivateRouteTableDB:
-    Type: AWS::EC2::RouteTable
-    DependsOn: LabVPC
-    Properties:
-      VpcId: !Ref LabVPC
-      Tags:
-        - Key: Name
-          Value: Private DB Route Table
-
-
-###########
-# Public Subnets x 2
-# Layer Type: Network Layer
-###########
-
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
-    DependsOn: LabVPC
-    Properties:
-      VpcId: !Ref LabVPC
-      MapPublicIpOnLaunch: true
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: !Select
-        - 0
-        - !GetAZs
-          Ref: AWS::Region
-      Tags:
-        - Key: Name
-          Value: Public Subnet 1
-
-  PublicSubnet2:
-    Type: AWS::EC2::Subnet
-    DependsOn: LabVPC
-    Properties:
-      VpcId: !Ref LabVPC
-      MapPublicIpOnLaunch: true
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: !Select
-        - 1
-        - !GetAZs
-          Ref: AWS::Region
-      Tags:
-        - Key: Name
-          Value: Public Subnet 2
-
-  PublicRouteTableAssociation1:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    DependsOn:
-      - PublicRouteTable
-      - PublicSubnet1
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet1
-
-  PublicRouteTableAssociation2:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    DependsOn:
-      - PublicRouteTable
-      - PublicSubnet2
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet2
 
   PrivateRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -322,10 +330,27 @@ Resources:
     DependsOn:
       - PrivateRouteTableApp
       - PrivateSubnet2
-      - NATGateway
     Properties:
       RouteTableId: !Ref PrivateRouteTableApp
       SubnetId: !Ref PrivateSubnet2
+
+
+
+
+###########
+# Private DB Route Table
+# Layer Type: Network Layer
+###########
+
+  PrivateRouteTableDB:
+    Type: AWS::EC2::RouteTable
+    DependsOn: LabVPC
+    Properties:
+      VpcId: !Ref LabVPC
+      Tags:
+        - Key: Name
+          Value: Private DB Route Table
+
 
 
 ###########
@@ -360,6 +385,11 @@ Resources:
       Tags:
         - Key: Name
           Value: Private DB Subnet 2
+
+###########
+# Private DB Route Table Association
+# Layer Type: Network Layer
+###########
 
   PrivateRouteTableAssociationDB1:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -429,6 +459,8 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
+      #TargetType: instance
+
       TargetGroupAttributes:
         - Key: stickiness.enabled
           Value: true
@@ -588,7 +620,9 @@ Resources:
 
   DBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    DependsOn: LabVPC
+    DependsOn: 
+      - LabVPC
+      - AppSecurityGroup
     Properties:
       GroupName: ExampleDB-SG
       GroupDescription: Enable access to MySQL
@@ -668,7 +702,7 @@ Resources:
     DependsOn:
       - LinuxBastionHostOneKeyPair
       - LinuxBastionSecurityGroup
-      - PublicSubnet2
+      - PublicSubnet1
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -735,6 +769,7 @@ Resources:
       - WebServerSSHSecurityGroup
       - WebServerOneKeyPair
       - PrivateSubnet1
+      - InstanceProfile
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
@@ -802,6 +837,7 @@ Resources:
       - WebServerSSHSecurityGroup
       - AppSecurityGroup
       - PrivateSubnet2
+      - InstanceProfile
     Properties:
       InstanceType: t2.micro
       ImageId: !Ref LatestAL2023AmiId
