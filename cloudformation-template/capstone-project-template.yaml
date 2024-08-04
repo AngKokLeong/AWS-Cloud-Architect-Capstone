@@ -893,7 +893,6 @@ Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-      - AppTargetGroup
       - ExampleLaunchTemplate
       - PrivateSubnet1
       - PrivateSubnet2
@@ -905,7 +904,7 @@ Resources:
         LaunchTemplateId: !Ref ExampleLaunchTemplate
         Version: !GetAtt ExampleLaunchTemplate.LatestVersionNumber
       MinSize: 2
-      MaxSize: 6
+      MaxSize: 2
       DesiredCapacity: 2
       HealthCheckGracePeriod: 300
       HealthCheckType: ELB
@@ -913,7 +912,7 @@ Resources:
         - !GetAtt AppTargetGroup.TargetGroupArn
       Tags:
         - Key: Name
-          Value: AutoScalingGroupPrivateSubnet
+          Value: WebServerAutoScalingGroup
           PropagateAtLaunch: true
 
   TargetTrackingScalingPolicy:
