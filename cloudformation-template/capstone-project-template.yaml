@@ -31,6 +31,45 @@ Parameters:
     MinLength: 4
     Default: countries
 
+  AuroraDatabaseClusterMaxCapacity:
+    Type: Number
+    Description: Enter Aurora Database Cluster Max Capacity
+    Default: 8
+    MinValue: 2
+    MaxValue: 32
+
+  AuroraDatabaseClusterMinCapacity:
+    Type: Number
+    Description: Enter Aurora Database Cluster Min Capacity
+    Default: 0.5
+    MinValue: 0.5
+    MaxValue: 16
+
+  DatabaseClusterName:
+    Type: String
+    Description: The name of the Aurora Serverless v2 cluster
+
+  DatabaseClusterEngine:
+    Type: String
+    Description: The name of the Aurora Serverless v2 cluster
+    AllowedValues:
+      - aurora-mysql
+      - aurora-postgresql
+
+  DatabaseClusterEngineVersion:
+    Type: String
+    Description: The version of the Aurora Serverless v2 cluster
+    Default: 3.04
+    AllowedValues:
+      - '3.04'
+      - '3.05'
+      - '3.06'
+      - '3.07'
+
+    
+
+
+
 Resources:
 
 ##################################################
@@ -681,14 +720,12 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
               #!/bin/bash -ex
-
+              
                 dnf -y update
                 dnf -y install php8.2
-                dnf -y install mariadb105-server
+                dnf -y install mysql-shell
                 dnf install -y php-mysqli
 
-                systemctl start mariadb.service
-                
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -739,11 +776,9 @@ Resources:
               
                 dnf -y update
                 dnf -y install php8.2
-                dnf -y install mariadb105-server
+                dnf -y install mysql-shell
                 dnf install -y php-mysqli
 
-                systemctl start mariadb.service
-                
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -829,11 +864,9 @@ Resources:
               
                 dnf -y update
                 dnf -y install php8.2
-                dnf -y install mariadb105-server
+                dnf -y install mysql-shell
                 dnf install -y php-mysqli
 
-                systemctl start mariadb.service
-                
                 cd /var/www/html/
                 wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
                 unzip aws -d /var/www/html
@@ -892,7 +925,44 @@ Resources:
 # Layer Type: Database Layer
 ##########
 
-## TODO: Create the 
+# https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html#aurora-serverless-v2.max_capacity_considerations
+# 8 ACU Can support a maximum connection of 1000 for Aurora MYSQL
+# 0.5 ACU can support a maximum connection of 45 for Aurora MYSQL
+
+  AuroraServerlessDatabaseCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref DatabaseClusterName
+      Engine: aurora-mysql
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DatabaseName: !Ref DatabaseName
+      MasterUsername: !Ref DatabaseUserName
+      MasterUserPassword: !Ref DatabasePassword
+      MasterUserSecret:
+        SecretArn: !Ref DatabasePasswordSecret
+      VpcSecurityGroupIds:
+        - Fn::GetAtt: [DBSecurityGroup, GroupId]
+      DeletionProtection: false
+      ServerlessV2ScalingConfiguration:
+        MaxCapacity: !Ref AuroraDatabaseClusterMaxCapacity
+        MinCapacity: !Ref AuroraDatabaseClusterMinCapacity
+      Tags:
+        - Key: Name
+          Value: !Ref DatabaseClusterName
+
+  RDSDBInstance1:
+      Type: 'AWS::RDS::DBInstance'
+      Properties:
+        Engine: aurora-mysql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref AuroraServerlessDatabaseCluster
+
+  RDSDBInstance2:
+      Type: 'AWS::RDS::DBInstance'
+      Properties:
+        Engine: aurora-mysql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref AuroraServerlessDatabaseCluster
 
 
 Outputs:
@@ -939,3 +1009,11 @@ Outputs:
   VpcId: 
     Value: !GetAtt LabVPC.VpcId
     Description: VPC ID
+
+  AuroraServerlessDatabaseClusterMinACU:
+    Description: The minimum ACU for the Aurora Serverless v2 cluster
+    Value: !Ref AuroraDatabaseClusterMinCapacity
+
+  AuroraServerlessDatabaseClusterMaxACU:
+    Description: The maximum ACU for the Aurora Serverless v2 cluster
+    Value: !Ref AuroraDatabaseClusterMaxCapacity
