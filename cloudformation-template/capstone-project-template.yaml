@@ -424,12 +424,14 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       TargetGroupAttributes:
-       - Key: stickiness.enabled
-         Value: true
-       - Key: stickiness.type
-         Value: lb_cookie
-       - Key: stickiness.lb_cookie.duration_seconds
-         Value: 10
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: app_cookie
+        - Key: stickiness.app_cookie.duration_seconds
+          Value: 30
+        - Key: stickiness.app_cookie.cookie_name
+          Value: TESTCOOKIE
 
 ##################################################
 # SECURITY LAYER
@@ -720,21 +722,30 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
               #!/bin/bash -ex
-              
                 dnf -y update
+              
                 dnf -y install php8.2
-                dnf -y install mysql-shell
+                dnf -y install mariadb105-server
                 dnf install -y php-mysqli
+                dnf -y install git
 
                 cd /var/www/html/
-                wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
-                unzip aws -d /var/www/html
-                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
-                #wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-89090/22-lab-course-project/s3/Example.zip
-                unzip Example.zip
+                
+                # Clone the Git Repository containing the Sample PHP application
+                sudo git clone https://github.com/AngKokLeong/AWS-Cloud-Architect-Capstone-Sample-PHP-Application.git
+                
+                # Move every item from AWS-Cloud-Architect-Capstone-Sample-PHP-Application to /var/www/html/
+                sudo mv AWS-Cloud-Architect-Capstone-Sample-PHP-Application/* ./
+                sudo rm -rf AWS-Cloud-Architect-Capstone-Sample-PHP-Application 
+
                 chkconfig httpd on
                 service httpd start
+                
                 wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+
+                # Command to import sql data 
+                # mysql --host=<Aurora DB Cluster Writer Endpoint> --database=countries --port=3306  --user=<Database Cluster User Name> --password < Countrydatadump.sql
+
                 chown ec2-user:ec2-user Countrydatadump.sql
                 
                 chown -R ec2-user:ec2-user /var/www/html
@@ -773,21 +784,30 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
               #!/bin/bash -ex
-              
                 dnf -y update
+              
                 dnf -y install php8.2
-                dnf -y install mysql-shell
+                dnf -y install mariadb105-server
                 dnf install -y php-mysqli
+                dnf -y install git
 
                 cd /var/www/html/
-                wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
-                unzip aws -d /var/www/html
-                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
-                #wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-89090/22-lab-course-project/s3/Example.zip
-                unzip Example.zip
+                
+                # Clone the Git Repository containing the Sample PHP application
+                sudo git clone https://github.com/AngKokLeong/AWS-Cloud-Architect-Capstone-Sample-PHP-Application.git
+                
+                # Move every item from AWS-Cloud-Architect-Capstone-Sample-PHP-Application to /var/www/html/
+                sudo mv AWS-Cloud-Architect-Capstone-Sample-PHP-Application/* ./
+                sudo rm -rf AWS-Cloud-Architect-Capstone-Sample-PHP-Application 
+
                 chkconfig httpd on
                 service httpd start
+                
                 wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+
+                # Command to import sql data 
+                # mysql --host=<Aurora DB Cluster Writer Endpoint> --database=countries --port=3306  --user=<Database Cluster User Name> --password < Countrydatadump.sql
+
                 chown ec2-user:ec2-user Countrydatadump.sql
                 
                 chown -R ec2-user:ec2-user /var/www/html
@@ -861,21 +881,30 @@ Resources:
         UserData:
           Fn::Base64: !Sub | 
               #!/bin/bash -ex
-              
                 dnf -y update
+              
                 dnf -y install php8.2
-                dnf -y install mysql-shell
+                dnf -y install mariadb105-server
                 dnf install -y php-mysqli
+                dnf -y install git
 
                 cd /var/www/html/
-                wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
-                unzip aws -d /var/www/html
-                wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-113230/22-lab-Capstone-project/s3/Example.zip
-                #wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/CUR-TF-200-ACACAD-3-89090/22-lab-course-project/s3/Example.zip
-                unzip Example.zip
+                
+                # Clone the Git Repository containing the Sample PHP application
+                sudo git clone https://github.com/AngKokLeong/AWS-Cloud-Architect-Capstone-Sample-PHP-Application.git
+                
+                # Move every item from AWS-Cloud-Architect-Capstone-Sample-PHP-Application to /var/www/html/
+                sudo mv AWS-Cloud-Architect-Capstone-Sample-PHP-Application/* ./
+                sudo rm -rf AWS-Cloud-Architect-Capstone-Sample-PHP-Application 
+
                 chkconfig httpd on
                 service httpd start
+
                 wget https://aws-tc-largeobjects.s3.us-west-2.amazonaws.com/CUR-TF-200-ACACAD-2/21-course-project/s3/Countrydatadump.sql
+
+                # Command to import sql data 
+                # mysql --host=<Aurora DB Cluster Writer Endpoint> --database=countries --port=3306  --user=<Database Cluster User Name> --password < Countrydatadump.sql
+
                 chown ec2-user:ec2-user Countrydatadump.sql
                 
                 chown -R ec2-user:ec2-user /var/www/html
