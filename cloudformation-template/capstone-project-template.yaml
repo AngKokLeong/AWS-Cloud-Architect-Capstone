@@ -48,6 +48,7 @@ Parameters:
   DatabaseClusterName:
     Type: String
     Description: The name of the Aurora Serverless v2 cluster
+    Default: auroradbcluster
 
   DatabaseClusterEngine:
     Type: String
@@ -999,7 +1000,7 @@ Resources:
   DatabasePasswordSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstoneproject/databasePassword
+      Name: capstoneprojectv2/databasePassword
       SecretString: !Ref DatabasePassword
       Description: Database password for the Database that PHP Application will use to access
 
@@ -1010,7 +1011,7 @@ Resources:
   DatabaseUserNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstoneproject/databaseUsername
+      Name: capstoneprojectv2/databaseUsername
       SecretString: !Ref DatabaseUserName
       Description: Database Username for the Database that PHP Application will use to access
 
@@ -1021,7 +1022,7 @@ Resources:
   DatabaseNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstoneproject/databaseName
+      Name: capstoneprojectv2/databaseName
       SecretString: !Ref DatabaseName
       Description: Database Name for the Database that PHP Application will use to access
 
@@ -1033,7 +1034,7 @@ Resources:
     Type: AWS::SecretsManager::Secret
     DependsOn: AuroraServerlessDatabaseCluster
     Properties:
-      Name: capstoneproject/databaseClusterEndpoint
+      Name: capstoneprojectv2/databaseClusterEndpoint
       SecretString: !GetAtt AuroraServerlessDatabaseCluster.Endpoint.Address
       Description: Aurora Database Cluster Endpoint Address
 
@@ -1058,7 +1059,6 @@ Resources:
       DBSubnetGroupName: !Ref DBSubnetGroup
       DatabaseName: !Ref DatabaseName
       MasterUsername: !Ref DatabaseUserName
-      MasterUserPassword: !Ref DatabasePassword
       MasterUserSecret:
         SecretArn: !Ref DatabasePasswordSecret
       ManageMasterUserPassword: true
