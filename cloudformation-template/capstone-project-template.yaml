@@ -1000,7 +1000,7 @@ Resources:
   DatabasePasswordSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstone/databasePassword
+      Name: capstoneproject/databasePassword
       SecretString: !Ref DatabasePassword
       Description: Database password for the Database that PHP Application will use to access
 
@@ -1011,7 +1011,7 @@ Resources:
   DatabaseUserNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstone/databaseUsername
+      Name: capstoneproject/databaseUsername
       SecretString: !Ref DatabaseUserName
       Description: Database Username for the Database that PHP Application will use to access
 
@@ -1022,7 +1022,7 @@ Resources:
   DatabaseNameSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: capstone/databaseName
+      Name: capstoneproject/databaseName
       SecretString: !Ref DatabaseName
       Description: Database Name for the Database that PHP Application will use to access
 
@@ -1034,10 +1034,9 @@ Resources:
     Type: AWS::SecretsManager::Secret
     DependsOn: AuroraServerlessDatabaseCluster
     Properties:
-      Name: capstone/databaseClusterEndpoint
+      Name: capstoneproject/databaseClusterEndpoint
       SecretString: !GetAtt AuroraServerlessDatabaseCluster.Endpoint.Address
       Description: Aurora Database Cluster Endpoint Address
-
 
 
 ##########
@@ -1053,7 +1052,6 @@ Resources:
     Type: AWS::RDS::DBCluster
     DependsOn: 
       - DBSecurityGroup
-      - DatabasePasswordSecret
       - DBSubnetGroup
     Properties:
       DBClusterIdentifier: !Ref DatabaseClusterName
