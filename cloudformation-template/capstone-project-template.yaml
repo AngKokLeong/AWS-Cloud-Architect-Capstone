@@ -936,7 +936,6 @@ Resources:
     Type: AWS::EC2::LaunchTemplate
     DependsOn: 
       - AppSecurityGroup
-      - InstanceProfile
     Properties:
       LaunchTemplateData:
         InstanceType: t2.micro
@@ -1062,6 +1061,7 @@ Resources:
       MasterUserPassword: !Ref DatabasePassword
       MasterUserSecret:
         SecretArn: !Ref DatabasePasswordSecret
+      ManageMasterUserPassword: true
       VpcSecurityGroupIds:
         - Fn::GetAtt: [DBSecurityGroup, GroupId]
       DeletionProtection: false
